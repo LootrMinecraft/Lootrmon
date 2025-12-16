@@ -1,0 +1,37 @@
+# eclipse
+bin
+*.launch
+.settings
+.metadata
+.classpath
+.project
+
+# idea
+out
+*.ipr
+*.iws
+*.iml
+.idea
+
+# gradle
+build
+.gradle
+
+# other
+eclipse
+run
+/runs
+.gitattributes
+/deps
+/flatdir
+
+# Files from Forge MDK
+forge*changelog.txt
+.factorypath
+
+# songs
+*.ogg
+
+# Misc
+CHANGELOG_OLD.md
+oxipng.exe

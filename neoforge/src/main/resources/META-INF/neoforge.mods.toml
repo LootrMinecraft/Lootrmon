@@ -1,0 +1,35 @@
+modLoader="javafml" 
+loaderVersion="[2,)"
+issueTrackerURL="https://github.com/LootrMinecraft/LootrExampleMod/issues"
+license="https://github.com/LootrMinecraft/LootrExampleMod/blob/arch-1.21/LICENSE"
+[[mods]]
+    modId="lootrmon"
+    version="${version}"
+    displayName="Lootr & Cobblemon Compatibility"
+    displayURL="https://minecraft.curseforge.com/projects/lootrmon"
+    authors="Noobanidus"
+    description="Adding native gilded chest compatibility to Cobblemon & Lootr."
+
+[[dependencies.lootrmon]]
+    modId="minecraft"
+    type="required"
+    versionRange="[1.21.1,)"
+
+[[dependencies.lootrmon]]
+    modId="neoforge"
+    type="required"
+    versionRange="[21,)"
+
+[[dependencies.lootrmon]]
+    modId="lootr"
+    type="required"
+    versionRange="[1.21-1.10.35.97,)"
+    ordering = "AFTER"
+    side = "BOTH"
+
+[[dependencies.lootrmon]]
+    modId="cobblemon"
+    type="required"
+    versionRange="[1.7.0,)"
+    ordering = "AFTER"
+    side = "BOTH"
