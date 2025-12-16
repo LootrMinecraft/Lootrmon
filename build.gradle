@@ -36,6 +36,119 @@ subprojects {
         minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
         mappings loom.officialMojangMappings()
     }
+
+    Map<String, Map<String, String>> platformSettings = [
+            "fabric": [
+                    "curse-id": "1405644",
+                    "curse-slug": "lootrmon",
+                    "modrinth-id": "ywwXJDli",
+                    "title": "for Fabric"
+            ],
+            "neoforge": [
+                    "curse-id": "1405644",
+                    "curse-slug": "lootrmon",
+                    "modrinth-id": "ywwXJDli",
+                    "title": "for NeoForge"
+            ]
+    ]
+
+    Map<String, Map<String, Boolean>> platformDependencies = [
+            "fabric": [
+                    "fabric-api": true,
+                    "cloth-config": true,
+                    "cobblemon": true,
+                    "lootr": true
+            ],
+            "neoforge": [
+                    "cobblemon": true,
+                    "lootr": true
+            ]
+    ]
+
+    var env = System.getenv()
+    def uploadSettings = platformSettings.get(name)
+    def uploadDependencies = platformDependencies.get(name)
+
+    def gitRepo = getExecOutput(['git', 'remote', 'get-url', 'origin'])
+    def gitCommit = getExecOutput(['git', 'log', '-n', '1', '--pretty=tformat:%h'])
+    def gitPrevCommit = project.findProperty("git_previous_commit") ?: env["GIT_PREVIOUS_COMMIT"]
+
+
+    String changelogText = ""
+
+    if (gitCommit && gitPrevCommit) {
+        changelogText += getExecOutput(['git', 'log', "--pretty=tformat:- %s [(%h)](${gitRepo}/commit/%h)", '' + gitPrevCommit + '..' + gitCommit])
+    }
+
+    // Limit the changelog to 500 characters
+    changelogText = changelogText.take(500)
+
+
+    if (uploadSettings != null && uploadDependencies != null) {
+
+        //File changeLog = rootProject.file("CHANGELOG.md")
+        //String changelogText = changeLog.exists() ? changeLog.text : ""
+
+        publishMods {
+            file = tasks.remapJar.archiveFile
+            // TODO: Change this soonish
+            type = ALPHA
+            changelog = changelogText
+
+            displayName = "lootr-${name}-${rootProject.minecraft_version}-${rootProject.mod_version}"
+            version = "${rootProject.mod_version}"
+            modLoaders.add(name)
+
+            if (project.hasProperty("curse_auth")) {
+                curseforge {
+                    accessToken = project.findProperty("curse_auth")
+                    projectId = uploadSettings["curse-id"]
+                    projectSlug = uploadSettings["curse-slug"]
+                    announcementTitle = "Lootrmon ${rootProject.minecraft_version}-${rootProject.mod_version} ${uploadSettings["title"]} on CurseForge"
+                    // TODO: Hard-coded
+                    minecraftVersions.add(rootProject.minecraft_version)
+
+                    if (uploadDependencies.size() > 0) {
+                        uploadDependencies.each { dep, required ->
+                            if (required) {
+                                requires(dep)
+                            }
+                            else {
+                                optional(dep)
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (project.hasProperty("modrinth_auth")) {
+                modrinth {
+                    accessToken = project.findProperty("modrinth_auth")
+                    projectId = uploadSettings["modrinth-id"]
+                    announcementTitle = "Lootrmon ${rootProject.minecraft_version}-${rootProject.mod_version} ${uploadSettings["title"]} on Modrinth"
+                    minecraftVersions.add(rootProject.minecraft_version)
+
+                    dependencies {
+                        uploadDependencies.each { dep, required ->
+                            if (required) {
+                                requires(dep)
+                            } else {
+                                optional(dep)
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (project.hasProperty("curse_discord_webhook")) {
+                discord {
+                    webhookUrl = project.findProperty("curse_discord_webhook")
+                    username = "Lootrmon Update"
+                    setPlatforms(publishMods.platforms.curseforge, publishMods.platforms.modrinth)
+                }
+            }
+        }
+    }
 }
 
 allprojects {
