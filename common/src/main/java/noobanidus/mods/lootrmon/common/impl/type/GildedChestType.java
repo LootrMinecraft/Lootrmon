@@ -27,6 +27,12 @@ public class GildedChestType implements ILootrType {
   }
 
   @Override
+  public boolean displaysUnopenedParticle() {
+    // No particles because otherwise you know from a distance if it's a mimic
+    return false;
+  }
+
+  @Override
   public void callback() {
     type = this;
   }

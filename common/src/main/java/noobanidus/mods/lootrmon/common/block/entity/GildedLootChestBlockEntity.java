@@ -227,6 +227,11 @@ public class GildedLootChestBlockEntity extends RandomizableContainerBlockEntity
     return lootTableSeed;
   }
 
+  @Override
+  public Level getInfoLevel() {
+    return level;
+  }
+
   private void signalOpenCount(Level level, BlockPos pos, BlockState state, int p155364, int p155365) {
     level.blockEvent(pos, this.getBlockState().getBlock(), 1, p155365);
   }
@@ -326,6 +331,11 @@ public class GildedLootChestBlockEntity extends RandomizableContainerBlockEntity
     double d2 = (double) pPos.getZ() + 0.5D;
 
     pLevel.playSound(null, d0, d1, d2, pSound, SoundSource.BLOCKS, 0.5F, pLevel.random.nextFloat() * 0.1F + 0.9F);
+  }
+
+  @Override
+  public double getParticleYOffset() {
+    return 1.1;
   }
 
   @AutoService(ILootrBlockEntityConverter.class)
