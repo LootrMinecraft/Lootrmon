@@ -6,13 +6,12 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import noobanidus.mods.lootr.common.api.registry.LootrProperties;
 import noobanidus.mods.lootrmon.common.LootrmonIds;
 import noobanidus.mods.lootrmon.common.block.GildedLootChestBlock;
 import noobanidus.mods.lootrmon.common.block.entity.GildedLootChestBlockEntity;
 
 public class LootrmonRegistry {
-  public static final GildedLootChestBlock GILDED_LOOT_CHEST = new GildedLootChestBlock(LootrProperties.CHEST_PROPERTIES);
+  public static final GildedLootChestBlock GILDED_LOOT_CHEST = new GildedLootChestBlock(LootrmonIds.GILDED_CHEST_PROPERTIES);
 
   public static final BlockItem GILDED_LOOT_CHEST_ITEM = new BlockItem(GILDED_LOOT_CHEST, new Item.Properties());
 
