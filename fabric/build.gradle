@@ -36,7 +36,8 @@ dependencies {
     modCompileOnly("maven.modrinth:modmenu:${rootProject.mod_menu}")
     modRuntimeOnly("maven.modrinth:modmenu:${rootProject.mod_menu}")
 
-    modImplementation "noobanidus.mods.lootr:lootr-fabric:${rootProject.lootr_version}"
+    modCompileOnly("noobanidus.mods.lootr:lootr-fabric:${rootProject.lootr_version}")
+    modRuntimeOnly("noobanidus.mods.lootr:lootr-fabric:${rootProject.lootr_version}")
 
     modImplementation "net.fabricmc:fabric-language-kotlin:$project.kotlin_fabric_version"
     modImplementation "com.cobblemon:fabric:${project.cobblemon_version}"
