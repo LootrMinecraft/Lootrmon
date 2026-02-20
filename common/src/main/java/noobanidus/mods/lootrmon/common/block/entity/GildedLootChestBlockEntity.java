@@ -14,7 +14,6 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -22,6 +21,7 @@ import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
@@ -30,7 +30,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootTable;
 import noobanidus.mods.lootr.common.api.ILootrBlockEntityConverter;
 import noobanidus.mods.lootr.common.api.ILootrType;
-import noobanidus.mods.lootr.common.api.NBTConstants;
+import noobanidus.mods.lootr.common.api.LootrAPI;
 import noobanidus.mods.lootr.common.api.data.LootrBlockType;
 import noobanidus.mods.lootr.common.api.data.SimpleLootrInstance;
 import noobanidus.mods.lootr.common.api.data.blockentity.ILootrBlockEntity;
@@ -44,9 +44,6 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 public class GildedLootChestBlockEntity extends RandomizableContainerBlockEntity implements ILootrBlockEntity {
-  private boolean custom = false;
-  private NonNullList<ItemStack> customInventory;
-
   private final SimpleLootrInstance lootrInstance = new SimpleLootrInstance(this::getVisualOpeners, 27);
   public final GildedState posableState = new GildedState();
   private final ContainerOpenersCounter openersCounter = new ContainerOpenersCounter() {
@@ -95,11 +92,16 @@ public class GildedLootChestBlockEntity extends RandomizableContainerBlockEntity
 
   @Override
   protected NonNullList<ItemStack> getItems() {
-    return lootrInstance.getItems();
+    return lootrInstance.getEmptyItemList();
   }
 
   @Override
   protected void setItems(NonNullList<ItemStack> nonNullList) {
+  }
+
+  @Override
+  public void setInfoReferenceInventory(NonNullList<ItemStack> reference) {
+    lootrInstance.setCustomInventory(reference);
   }
 
   @Override
@@ -209,12 +211,12 @@ public class GildedLootChestBlockEntity extends RandomizableContainerBlockEntity
 
   @Override
   public @Nullable NonNullList<ItemStack> getInfoReferenceInventory() {
-    return null;
+    return lootrInstance.getCustomInventory();
   }
 
   @Override
   public boolean isInfoReferenceInventory() {
-    return false;
+    return isInfoReferenceInventoryInternal(lootrInstance.isCustomInventory());
   }
 
   @Override
@@ -234,10 +236,11 @@ public class GildedLootChestBlockEntity extends RandomizableContainerBlockEntity
 
   private void signalOpenCount(Level level, BlockPos pos, BlockState state, int p155364, int p155365) {
     level.blockEvent(pos, this.getBlockState().getBlock(), 1, p155365);
-  }
-
-  public void setCustomInventory(NonNullList<ItemStack> inventory) {
-    this.customInventory = inventory;
+    if (LootrAPI.isCustomTrapped() && p155364 == p155365 && isInfoReferenceInventory()) {
+      Block block = state.getBlock();
+      level.updateNeighborsAt(pos, block);
+      level.updateNeighborsAt(pos.below(), block);
+    }
   }
 
   @Override
@@ -245,10 +248,6 @@ public class GildedLootChestBlockEntity extends RandomizableContainerBlockEntity
     super.saveAdditional(compoundTag, provider);
     trySaveLootTable(compoundTag);
     lootrInstance.saveAdditional(compoundTag, provider, level != null && level.isClientSide());
-    if (custom && customInventory != null) {
-      compoundTag.putInt(NBTConstants.CUSTOM_SIZE, this.customInventory.size());
-      compoundTag.put(NBTConstants.CUSTOM_INVENTORY, ContainerHelper.saveAllItems(new CompoundTag(), this.customInventory, provider));
-    }
   }
 
   @Override
@@ -256,16 +255,6 @@ public class GildedLootChestBlockEntity extends RandomizableContainerBlockEntity
     super.loadAdditional(compoundTag, provider);
     tryLoadLootTable(compoundTag);
     lootrInstance.loadAdditional(compoundTag, provider);
-    if (compoundTag.contains(NBTConstants.CUSTOM_INVENTORY) && compoundTag.contains(NBTConstants.CUSTOM_SIZE)) {
-      int size = compoundTag.getInt(NBTConstants.CUSTOM_SIZE);
-      for (int i = 0; i < Math.min(size, this.customInventory.size()); i++) {
-        this.customInventory.set(i, ItemStack.EMPTY);
-      }
-      ContainerHelper.loadAllItems(compoundTag.getCompound(NBTConstants.CUSTOM_INVENTORY), this.customInventory, provider);
-      if (this.customInventory.stream().anyMatch(o -> !o.isEmpty())) {
-        this.custom = true;
-      }
-    }
   }
 
   @Override

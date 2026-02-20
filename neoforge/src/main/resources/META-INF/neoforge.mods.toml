@@ -23,7 +23,7 @@ license="https://github.com/LootrMinecraft/LootrExampleMod/blob/arch-1.21/LICENS
 [[dependencies.lootrmon]]
     modId="lootr"
     type="required"
-    versionRange="[1.21.1-1.11.36.112,)"
+    versionRange="[1.21.1-1.11.36.115,)"
     ordering = "AFTER"
     side = "BOTH"
 
